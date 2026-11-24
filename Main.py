@@ -29,16 +29,16 @@ class HeatTransfer(QWidget):
         self.slider1 = self.make_slider(200)
         self.slider2 = self.make_slider(0)
 
-        box1 = self.make_box("red")
-        box2 = self.make_box("black")
+        self.box1 = self.make_box("red")
+        self.box2 = self.make_box("black")
 
         bar = QFrame()
         bar.setFixedHeight(22)
         bar.setFixedWidth(200)  # length of the bar = distance between the boxes
         bar.setStyleSheet("background-color: #a9a9a9;")
 
-        conductivity = self.make_spinbox(1.0, " J/s°C")
-        conductivity.setFixedWidth(160)
+        self.conductivity = self.make_spinbox(1.0, " J/s°C")
+        self.conductivity.setFixedWidth(160)
 
         # label + field above the bar
         conductivity_box = QWidget()
@@ -46,7 +46,7 @@ class HeatTransfer(QWidget):
         conductivity_layout = QVBoxLayout(conductivity_box)
         conductivity_layout.setContentsMargins(0, 0, 0, 5)
         conductivity_layout.addWidget(QLabel("Conductivity"), alignment=Qt.AlignHCenter)
-        conductivity_layout.addWidget(conductivity, alignment=Qt.AlignHCenter)
+        conductivity_layout.addWidget(self.conductivity, alignment=Qt.AlignHCenter)
 
         # empty space below the bar, same height as above -> bar stays in the middle
         spacer = QWidget()
@@ -65,9 +65,9 @@ class HeatTransfer(QWidget):
         top.addStretch()
         top.addWidget(self.slider1)
         top.addSpacing(10)
-        top.addWidget(box1)
+        top.addWidget(self.box1)
         top.addLayout(middle)
-        top.addWidget(box2)
+        top.addWidget(self.box2)
         top.addSpacing(10)
         top.addWidget(self.slider2)
         top.addStretch()
@@ -89,10 +89,15 @@ class HeatTransfer(QWidget):
         about_button = QPushButton("About")
         about_button.clicked.connect(self.open_about)
 
+        self.mass1 = self.make_spinbox(10.0, " kg")
+        self.mass2 = self.make_spinbox(10.0, " kg")
+        self.cap1 = self.make_spinbox(0.4, " J/kg°C")
+        self.cap2 = self.make_spinbox(0.4, " J/kg°C")
+
         rows = [
             ("Temp.", self.temp1_label, self.temp2_label, self.start_button),
-            ("Mass", self.make_spinbox(10.0, " kg"), self.make_spinbox(10.0, " kg"), graphs_button),
-            ("H. Cap.", self.make_spinbox(0.4, " J/kg°C"), self.make_spinbox(0.4, " J/kg°C"), about_button),
+            ("Mass", self.mass1, self.mass2, graphs_button),
+            ("H. Cap.", self.cap1, self.cap2, about_button),
         ]
 
         grid = QGridLayout()
