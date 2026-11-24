@@ -180,7 +180,19 @@ class HeatTransfer(QWidget):
             widget.setEnabled(not checked)
 
     def timer_method(self):
-        pass  
+        k = self.conductivity.value()
+        q = k * (self.body1.temp - self.body2.temp) * self.dt
+        q1 = -q  
+        q2 = q  
+
+        t1 = self.body1.add_heat(q1)
+        t2 = self.body2.add_heat(q2)
+
+        self.slider1.setValue(round(t1))
+        self.slider2.setValue(round(t2))
+        self.show_temperature(self.box1, self.temp1_label, t1)
+        self.show_temperature(self.box2, self.temp2_label, t2)
+
     
     def open_graphs(self):
         if self.graph_window is None:
