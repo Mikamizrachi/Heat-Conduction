@@ -12,6 +12,17 @@ class Body:
         self.mass = mass
         self.specific_heat = specific_heat
         self.temp = temp
-        
-                
+
+
+    def add_heat(self, heat):
+        delta_t = heat / (self.mass * self.specific_heat)
+
+        self.temp = self.temp + delta_t
+        return self.temp
+
+
+
+
+
+
 
