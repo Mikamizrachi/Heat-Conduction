@@ -33,24 +33,43 @@ class HeatTransfer(QWidget):
 
         bar = QFrame()
         bar.setFixedHeight(22)
+        bar.setFixedWidth(200)  # length of the bar = distance between the boxes
         bar.setStyleSheet("background-color: #a9a9a9;")
 
         conductivity = self.make_spinbox(1.0, " J/s°C")
-        conductivity.setFixedWidth(110)
+        conductivity.setFixedWidth(160)
+
+        # label + field above the bar
+        conductivity_box = QWidget()
+        conductivity_box.setFixedHeight(60)
+        conductivity_layout = QVBoxLayout(conductivity_box)
+        conductivity_layout.setContentsMargins(0, 0, 0, 5)
+        conductivity_layout.addWidget(QLabel("Conductivity"), alignment=Qt.AlignHCenter)
+        conductivity_layout.addWidget(conductivity, alignment=Qt.AlignHCenter)
+
+        # empty space below the bar, same height as above -> bar stays in the middle
+        spacer = QWidget()
+        spacer.setFixedHeight(60)
 
         middle = QVBoxLayout()
+        middle.setSpacing(0)
         middle.addStretch()
-        middle.addWidget(QLabel("Conductivity"), alignment=Qt.AlignHCenter)
-        middle.addWidget(conductivity, alignment=Qt.AlignHCenter)
+        middle.addWidget(conductivity_box)
         middle.addWidget(bar)
+        middle.addWidget(spacer)
         middle.addStretch()
 
         top = QHBoxLayout()
+        top.setSpacing(0)  # the bar touches the boxes
+        top.addStretch()
         top.addWidget(slider1)
+        top.addSpacing(10)
         top.addWidget(box1)
-        top.addLayout(middle, stretch=1)
+        top.addLayout(middle)
         top.addWidget(box2)
+        top.addSpacing(10)
         top.addWidget(slider2)
+        top.addStretch()
 
         # --- bottom part: data fields and buttons ---
         start_button = QPushButton("Start")
@@ -85,7 +104,7 @@ class HeatTransfer(QWidget):
         main_layout.addLayout(top)
         main_layout.addLayout(grid)
 
-        self.resize(600, 400)
+        self.resize(560, 400)
 
     def make_slider(self, value):
         slider = QSlider(Qt.Vertical)
