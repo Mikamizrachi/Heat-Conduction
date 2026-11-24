@@ -24,9 +24,9 @@ class HeatTransfer(QWidget):
     def setupUI(self):
         self.setWindowTitle("Heat Transfer")
 
-        # --- top part: slider | body | conductor | body | slider ---
-        slider1 = self.make_slider(200)
-        slider2 = self.make_slider(0)
+       
+        self.slider1 = self.make_slider(200)
+        self.slider2 = self.make_slider(0)
 
         box1 = self.make_box("red")
         box2 = self.make_box("black")
@@ -62,13 +62,13 @@ class HeatTransfer(QWidget):
         top = QHBoxLayout()
         top.setSpacing(0)  # the bar touches the boxes
         top.addStretch()
-        top.addWidget(slider1)
+        top.addWidget(self.slider1)
         top.addSpacing(10)
         top.addWidget(box1)
         top.addLayout(middle)
         top.addWidget(box2)
         top.addSpacing(10)
-        top.addWidget(slider2)
+        top.addWidget(self.slider2)
         top.addStretch()
 
         # --- bottom part: data fields and buttons ---
@@ -140,6 +140,9 @@ class HeatTransfer(QWidget):
         if self.about_window is None:
             self.about_window = AboutWindow()
         self.about_window.show()
+
+
+
 
 
 
