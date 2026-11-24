@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
     QDoubleSpinBox, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,
 )
 from PySide6.QtCharts import QChart, QChartView, QValueAxis
+from About import About
 
 STYLE_FILE = Path(__file__).with_name("style.css")
 GITHUB_URL = "https://github.com/Mikamizrachi/Heat-Conduction"
@@ -156,7 +157,7 @@ class HeatTransfer(QWidget):
 
     def open_about(self):
         if self.about_window is None:
-            self.about_window = AboutWindow()
+            self.about_window = About()
         self.about_window.show()
 
 
