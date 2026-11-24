@@ -23,6 +23,11 @@ class HeatTransfer(QWidget):
         self.graph_window = None
         self.body1 = None
         self.body2 = None
+        self.time = 0
+        self.time_history = []
+        self.body1_temp_history = []
+        self.body2_temp_history = []
+
 
         self.dt = 0.05
         self.timer = QTimer()
@@ -168,6 +173,11 @@ class HeatTransfer(QWidget):
         if checked:
             self.body1 = Body(self.mass1.value(), self.cap1.value(), self.slider1.value())
             self.body2 = Body(self.mass2.value(), self.cap2.value(), self.slider2.value())
+            self.time = 0
+            self.time_history = []
+            self.body1_temp_history = []
+            self.body2_temp_history = []
+            self.save_history() 
             self.start_button.setText("Stop")
             self.timer.start()
         else:
@@ -192,6 +202,13 @@ class HeatTransfer(QWidget):
         self.slider2.setValue(round(t2))
         self.show_temperature(self.box1, self.temp1_label, t1)
         self.show_temperature(self.box2, self.temp2_label, t2)
+        self.time = self.time + self.dt
+        self.save_history()
+
+    def save_history(self):
+        self.time_history.append(round(self.time, 2))
+        self.body1_temp_history.append(self.body1.temp)
+        self.body2_temp_history.append(self.body2.temp)
 
     
     def open_graphs(self):
