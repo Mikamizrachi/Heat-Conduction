@@ -20,7 +20,17 @@ class Body:
         self.temp = self.temp + delta_t
         return self.temp
 
-    test
+
+if __name__ == "__main__":
+    body = Body(100, 0.15, 200)
+
+    print(body.add_heat(20))
+    print(body.add_heat(-40))
+    
+
+    
+
+
 
 
 
