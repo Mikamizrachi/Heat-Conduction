@@ -151,7 +151,7 @@ class HeatTransfer(QWidget):
     
     def open_graphs(self):
         if self.graph_window is None:
-            self.graph_window = GraphWindow()
+            self.graph_window = GraphWindow(self)
         self.graph_window.show()
 
     def open_about(self):
@@ -160,7 +160,49 @@ class HeatTransfer(QWidget):
         self.about_window.show()
 
 
+class GraphWindow(QWidget):
 
+    def __init__(self, main_window=None):
+        super().__init__()
+        self.main_window = main_window
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Graph Window")
+        self.setGeometry(560, 100, 430, 290)
+
+    
+        self.chart = QChart()
+        self.chart.legend().hide()
+        self.chart.setBackgroundVisible(False)           
+        self.chart.setPlotAreaBackgroundBrush(Qt.white)  
+        self.chart.setPlotAreaBackgroundVisible(True)
+
+        self.axis_x = QValueAxis()
+        self.axis_x.setTitleText("Time (s)")
+        self.axis_x.setRange(0, 1)
+        self.chart.addAxis(self.axis_x, Qt.AlignBottom)
+
+        self.axis_y = QValueAxis()
+        self.axis_y.setTitleText("Temperature (°C)")
+        self.axis_y.setRange(0, 1)
+        self.chart.addAxis(self.axis_y, Qt.AlignLeft)
+
+        self.chart_view = QChartView(self.chart, self)
+        self.chart_view.setGeometry(10, 10, 290, 270)
+
+        self.body_choice = QComboBox(self)
+        self.body_choice.addItems(["Body 1", "Body 2"])
+        self.body_choice.setGeometry(310, 20, 110, 28)
+
+        self.draw_button = QPushButton("Draw", self)
+        self.draw_button.setGeometry(310, 60, 110, 30)
+
+        self.clear_button = QPushButton("Clear", self)
+        self.clear_button.setGeometry(310, 100, 110, 30)
+
+        self.export_button = QPushButton("Export to CSV", self)
+        self.export_button.setGeometry(310, 140, 110, 30)
 
 
 
