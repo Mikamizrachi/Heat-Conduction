@@ -80,8 +80,8 @@ class HeatTransfer(QWidget):
         self.temp1_label = self.make_value_label("200.0 °C")
         self.temp2_label = self.make_value_label("0.0 °C")
         
-        self.slider1.valueChanged.connect(self.update_temp1)
-        self.slider2.valueChanged.connect(self.update_temp2) 
+        self.slider1.valueChanged.connect(self.left_temperature_changed)
+        self.slider2.valueChanged.connect(self.right_temperature_changed)
 
         graphs_button = QPushButton("Graphs")
         graphs_button.clicked.connect(self.open_graphs)
@@ -143,11 +143,18 @@ class HeatTransfer(QWidget):
         label.setObjectName("valueLabel")  
         return label
     
-    def update_temp1(self, value):
-        self.temp1_label.setText(f"{value:.1f} °C")
+    def left_temperature_changed(self, value):
+        self.show_temperature(self.box1, self.temp1_label, value)
 
-    def update_temp2(self, value):
-        self.temp2_label.setText(f"{value:.1f} °C")
+    def right_temperature_changed(self, value):
+        self.show_temperature(self.box2, self.temp2_label, value)
+
+    def show_temperature(self, box, label, temp):
+        label.setText(f"{temp:.1f} °C")
+      
+        red = int(temp / 200 * 255)
+        red = max(0, min(255, red))  
+        box.setStyleSheet(f"background-color: rgb({red}, 0, 0);")
 
     def start_toggled(self, checked):
         if checked:
