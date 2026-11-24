@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt , QTimer
 from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QSlider, QFrame, QPushButton,
@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCharts import QChart, QChartView, QValueAxis
 from About import About
+from Body import Body
 
 STYLE_FILE = Path(__file__).with_name("style.css")
 GITHUB_URL = "https://github.com/Mikamizrachi/Heat-Conduction"
@@ -20,6 +21,13 @@ class HeatTransfer(QWidget):
         # add other window
         self.about_window = None
         self.graph_window = None
+        self.body1 = None
+        self.body2 = None
+
+        self.dt = 0.05
+        self.timer = QTimer()
+        self.timer.setInterval(int(self.dt*1000))
+        self.timer.timeout.connect(self.timer_method)
         self.setupUI()
 
     def setupUI(self):
@@ -75,7 +83,7 @@ class HeatTransfer(QWidget):
         self.start_button = QPushButton("Start")
         self.start_button.setObjectName("startButton")
         self.start_button.setCheckable(True)  
-        self.start_button.toggled.connect(self.start_toggled)
+        self.start_button.toggled.connect(self.start_stop_button_method)
 
         self.temp1_label = self.make_value_label("200.0 °C")
         self.temp2_label = self.make_value_label("0.0 °C")
@@ -156,11 +164,23 @@ class HeatTransfer(QWidget):
         red = max(0, min(255, red))  
         box.setStyleSheet(f"background-color: rgb({red}, 0, 0);")
 
-    def start_toggled(self, checked):
+    def start_stop_button_method(self, checked):
         if checked:
+            self.body1 = Body(self.mass1.value(), self.cap1.value(), self.slider1.value())
+            self.body2 = Body(self.mass2.value(), self.cap2.value(), self.slider2.value())
             self.start_button.setText("Stop")
+            self.timer.start()
         else:
+
+            self.timer.stop()
             self.start_button.setText("Start")
+
+        for widget in [self.slider1, self.slider2, self.mass1, self.mass2,
+                       self.cap1, self.cap2, self.conductivity]:
+            widget.setEnabled(not checked)
+
+    def timer_method(self):
+        pass  
     
     def open_graphs(self):
         if self.graph_window is None:
