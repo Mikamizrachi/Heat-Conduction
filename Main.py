@@ -2,12 +2,12 @@ import sys
 from pathlib import Path
 
 from PySide6.QtCore import Qt , QTimer
-from PySide6.QtGui import QColor, QPainter, QPixmap
+from PySide6.QtGui import QColor, QPainter, QPixmap , QPen
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QSlider, QFrame, QPushButton,
     QDoubleSpinBox, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,
 )
-from PySide6.QtCharts import QChart, QChartView, QValueAxis
+from PySide6.QtCharts import QChart, QChartView, QValueAxis , QLineSeries
 from About import About
 from Body import Body
 
@@ -235,7 +235,6 @@ class GraphWindow(QWidget):
 
     
         self.chart = QChart()
-        self.chart.legend().hide()
         self.chart.setBackgroundVisible(False)           
         self.chart.setPlotAreaBackgroundBrush(Qt.white)  
         self.chart.setPlotAreaBackgroundVisible(True)
@@ -259,6 +258,7 @@ class GraphWindow(QWidget):
 
         self.draw_button = QPushButton("Draw", self)
         self.draw_button.setGeometry(310, 60, 110, 30)
+        self.draw_button.clicked.connect(self.draw_clicked)
 
         self.clear_button = QPushButton("Clear", self)
         self.clear_button.setGeometry(310, 100, 110, 30)
@@ -266,6 +266,34 @@ class GraphWindow(QWidget):
         self.export_button = QPushButton("Export to CSV", self)
         self.export_button.setGeometry(310, 140, 110, 30)
 
+
+    def draw_clicked(self):
+        times = self.main_window.time_history
+        if len(times) == 0:
+            return  
+        if self.body_choice.currentText() == "Body 1":
+            temps = self.main_window.body1_temp_history
+            color = "red"
+        else:
+            temps = self.main_window.body2_temp_history
+            color = "blue"
+
+        series = QLineSeries()
+        series.setName(self.body_choice.currentText())  # name in the legend
+        pen = QPen(QColor(color))
+        pen.setWidth(2)
+        series.setPen(pen)
+        for i in range(len(times)):
+            series.append(times[i], temps[i])
+
+
+        self.chart.addSeries(series)
+        series.attachAxis(self.axis_x)
+        series.attachAxis(self.axis_y)
+
+
+        self.axis_x.setRange(0, times[-1])
+        self.axis_y.setRange(0, 200)
 
 
 
