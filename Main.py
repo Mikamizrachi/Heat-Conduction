@@ -262,6 +262,7 @@ class GraphWindow(QWidget):
 
         self.clear_button = QPushButton("Clear", self)
         self.clear_button.setGeometry(310, 100, 110, 30)
+        self.clear_button.clicked.connect(self.clear_clicked)
 
         self.export_button = QPushButton("Export to CSV", self)
         self.export_button.setGeometry(310, 140, 110, 30)
@@ -295,6 +296,9 @@ class GraphWindow(QWidget):
         self.axis_x.setRange(0, times[-1])
         self.axis_y.setRange(0, 200)
 
+
+    def clear_clicked(self):
+        self.chart.removeAllSeries()
 
 
 
