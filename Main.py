@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt , QTimer
-from PySide6.QtGui import QColor, QPainter, QPixmap , QPen
+from PySide6.QtGui import QColor, QPen
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QSlider, QFrame, QPushButton,
     QDoubleSpinBox, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,
@@ -194,6 +194,13 @@ class HeatTransfer(QWidget):
     def timer_method(self):
         k = self.conductivity.value()
         q = k * (self.body1.temp - self.body2.temp) * self.dt
+        cap1 = self.body1.mass * self.body1.specific_heat
+        cap2 = self.body2.mass * self.body2.specific_heat
+        t_final = (cap1 * self.body1.temp + cap2 * self.body2.temp) / (cap1 + cap2)
+        q_max = cap1 * (self.body1.temp - t_final)
+        if abs(q) > abs(q_max):
+            q = q_max
+
         q1 = -q  
         q2 = q  
 
@@ -222,6 +229,13 @@ class HeatTransfer(QWidget):
         if self.about_window is None:
             self.about_window = About()
         self.about_window.show()
+
+    def closeEvent(self, event):
+        self.timer.stop()
+        if self.graph_window is not None:
+            self.graph_window.close()
+        if self.about_window is not None:
+            self.about_window.close()
 
 
 class GraphWindow(QWidget):
