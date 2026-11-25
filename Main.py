@@ -102,6 +102,9 @@ class HeatTransfer(QWidget):
 
         about_button = QPushButton("About")
         about_button.clicked.connect(self.open_about)
+        self.reset_button = QPushButton("Reset")
+        self.reset_button.clicked.connect(self.reset_clicked)
+
 
         self.mass1 = self.make_spinbox(10.0, " kg")
         self.mass2 = self.make_spinbox(10.0, " kg")
@@ -119,7 +122,7 @@ class HeatTransfer(QWidget):
         rows = [
             ("Temp.", self.temp1_label, self.temp2_label, self.start_button),
             ("Mass", self.mass1, self.mass2, graphs_button),
-            ("Material", self.material1, self.material2, None),
+            ("Material", self.material1, self.material2, self.reset_button),
             ("H. Cap.", self.cap1, self.cap2, about_button),
             ("Heater", self.heater1, self.heater2, None),]
 
@@ -285,6 +288,29 @@ class HeatTransfer(QWidget):
         self.time_history.append(round(self.time, 2))
         self.body1_temp_history.append(self.body1.temp)
         self.body2_temp_history.append(self.body2.temp)
+
+    
+    def reset_clicked(self):
+        self.start_button.setChecked(False) 
+        self.slider1.setValue(200)
+        self.slider2.setValue(0)
+        self.left_temperature_changed(200)
+        self.right_temperature_changed(0)
+        self.material1.setCurrentText("Custom")
+        self.material2.setCurrentText("Custom")
+        self.mass1.setValue(10)
+        self.mass2.setValue(10)
+        self.cap1.setValue(0.4)
+        self.cap2.setValue(0.4)
+        self.heater1.setValue(0)
+        self.heater2.setValue(0)
+        self.conductivity.setValue(1)
+        self.room_temp.setValue(20)
+        self.heat_loss.setValue(0)
+        self.speed_choice.setCurrentText("x1")    
+
+
+
 
     
     def open_graphs(self):
