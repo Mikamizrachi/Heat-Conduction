@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt , QTimer
 from PySide6.QtGui import QColor, QPen
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QSlider, QFrame, QPushButton,
-    QDoubleSpinBox, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,
+    QDoubleSpinBox, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,QMessageBox
 )
 from PySide6.QtCharts import QChart, QChartView, QValueAxis , QLineSeries
 from About import About
@@ -213,6 +213,9 @@ class HeatTransfer(QWidget):
         self.show_temperature(self.box2, self.temp2_label, t2)
         self.time = self.time + self.dt
         self.save_history()
+        if abs(t1 - t2) < 0.1:
+            self.start_button.setChecked(False)  
+            QMessageBox.information(self, "Equilibrium",f"The temperatures are equal ({t1:.1f} °C) after {self.time:.1f} s.")
 
     def save_history(self):
         self.time_history.append(round(self.time, 2))
