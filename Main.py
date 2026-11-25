@@ -304,18 +304,18 @@ class GraphWindow(QWidget):
 
         self.body_choice = QComboBox(self)
         self.body_choice.addItems(["Body 1", "Body 2"])
-        self.body_choice.setGeometry(310, 20, 110, 28)
+        self.body_choice.setGeometry(310, 60, 110, 28)
 
         self.draw_button = QPushButton("Draw", self)
-        self.draw_button.setGeometry(310, 60, 110, 30)
+        self.draw_button.setGeometry(310, 100, 110, 30)
         self.draw_button.clicked.connect(self.draw_clicked)
 
         self.clear_button = QPushButton("Clear", self)
-        self.clear_button.setGeometry(310, 100, 110, 30)
+        self.clear_button.setGeometry(310, 140, 110, 30)
         self.clear_button.clicked.connect(self.clear_clicked)
 
         self.export_button = QPushButton("Export to CSV", self)
-        self.export_button.setGeometry(310, 140, 110, 30)
+        self.export_button.setGeometry(310, 180, 110, 30)
         self.export_button.clicked.connect(self.export_clicked)
 
 
