@@ -14,14 +14,13 @@ from About import About
 from Body import Body
 
 STYLE_FILE = Path(__file__).with_name("style.css")
-MATERIALS = { "Custom": None, "Water": 4186, "Aluminum": 897, "Glass": 840, "Iron": 449, "Copper": 385,}
+MATERIALS = { "Custom": None, "Wood": 1700, "Aluminum": 897, "Glass": 840, "Iron": 449, "Copper": 385,}
 GITHUB_URL = "https://github.com/Mikamizrachi/Heat-Conduction"
 
 
 class HeatTransfer(QWidget):
     def __init__(self):
         super().__init__()
-        # add other window
         self.about_window = None
         self.graph_window = None
         self.body1 = None
@@ -50,13 +49,12 @@ class HeatTransfer(QWidget):
 
         bar = QFrame()
         bar.setFixedHeight(22)
-        bar.setFixedWidth(200)  # length of the bar = distance between the boxes
+        bar.setFixedWidth(200) 
         bar.setStyleSheet("background-color: #a9a9a9;")
 
         self.conductivity = self.make_spinbox(1.0, " J/s°C")
         self.conductivity.setFixedWidth(160)
 
-        # label + field above the bar
         conductivity_box = QWidget()
         conductivity_box.setFixedHeight(60)
         conductivity_layout = QVBoxLayout(conductivity_box)
@@ -64,7 +62,7 @@ class HeatTransfer(QWidget):
         conductivity_layout.addWidget(QLabel("Conductivity"), alignment=Qt.AlignHCenter)
         conductivity_layout.addWidget(self.conductivity, alignment=Qt.AlignHCenter)
 
-        # empty space below the bar, same height as above -> bar stays in the middle
+        
         spacer = QWidget()
         spacer.setFixedHeight(60)
 
@@ -77,7 +75,7 @@ class HeatTransfer(QWidget):
         middle.addStretch()
 
         top = QHBoxLayout()
-        top.setSpacing(0)  # the bar touches the boxes
+        top.setSpacing(0)  
         top.addStretch()
         top.addWidget(self.slider1)
         top.addSpacing(10)
@@ -115,12 +113,15 @@ class HeatTransfer(QWidget):
         self.material1.currentTextChanged.connect(self.material1_changed)
         self.material2.currentTextChanged.connect(self.material2_changed)
 
+        self.heater1 = self.make_spinbox(0, " W", 0, 1000)
+        self.heater2 = self.make_spinbox(0, " W", 0, 1000)
+
         rows = [
             ("Temp.", self.temp1_label, self.temp2_label, self.start_button),
             ("Mass", self.mass1, self.mass2, graphs_button),
             ("Material", self.material1, self.material2, None),
             ("H. Cap.", self.cap1, self.cap2, about_button),
-        ]
+            ("Heater", self.heater1, self.heater2, None),]
 
         grid = QGridLayout()
         grid.setHorizontalSpacing(10)
@@ -139,7 +140,7 @@ class HeatTransfer(QWidget):
         main_layout.addLayout(top)
         main_layout.addLayout(grid)
 
-        self.resize(560, 400)
+        self.resize(600, 480)
 
     def make_slider(self, value):
         slider = QSlider(Qt.Vertical)
@@ -154,9 +155,9 @@ class HeatTransfer(QWidget):
         box.setStyleSheet(f"background-color: {color};")
         return box
 
-    def make_spinbox(self, value, suffix):
+    def make_spinbox(self, value, suffix, minimum=0.01, maximum=10000):
         spin = QDoubleSpinBox()
-        spin.setRange(0.01, 10000)
+        spin.setRange(minimum, maximum)
         spin.setValue(value)
         spin.setSuffix(suffix)
         return spin
@@ -223,27 +224,34 @@ class HeatTransfer(QWidget):
         self.cap2.setEnabled(not checked and self.material2.currentText() == "Custom")
 
     def timer_method(self):
-        k = self.conductivity.value()
-        q = k * (self.body1.temp - self.body2.temp) * self.dt
+        dt = self.dt
+
         cap1 = self.body1.mass * self.body1.specific_heat
         cap2 = self.body2.mass * self.body2.specific_heat
-        t_final = (cap1 * self.body1.temp + cap2 * self.body2.temp) / (cap1 + cap2)
-        q_max = cap1 * (self.body1.temp - t_final)
+
+        t1 = self.body1.temp
+        t2 = self.body2.temp
+        q = self.conductivity.value() * (t1 - t2) * dt
+        t_final = (cap1 * t1 + cap2 * t2) / (cap1 + cap2)
+        q_max = cap1 * (t1 - t_final)
         if abs(q) > abs(q_max):
             q = q_max
+        self.body1.add_heat(-q)  
+        self.body2.add_heat(q)  
 
-        q1 = -q  
-        q2 = q  
-
-        t1 = self.body1.add_heat(q1)
-        t2 = self.body2.add_heat(q2)
+        heat1 = self.heater1.value() * dt
+        heat2 = self.heater2.value() * dt
+        t1 = self.body1.add_heat(heat1)
+        t2 = self.body2.add_heat(heat2)
 
         self.slider1.setValue(round(t1))
         self.slider2.setValue(round(t2))
         self.show_temperature(self.box1, self.temp1_label, t1)
         self.show_temperature(self.box2, self.temp2_label, t2)
-        self.time = self.time + self.dt
+
+        self.time = self.time + dt
         self.save_history()
+
         if abs(t1 - t2) < 0.1:
             self.start_button.setChecked(False)  
             QMessageBox.information(self, "Equilibrium",f"The temperatures are equal ({t1:.1f} °C) after {self.time:.1f} s.")
@@ -331,7 +339,7 @@ class GraphWindow(QWidget):
             color = "blue"
 
         series = QLineSeries()
-        series.setName(self.body_choice.currentText())  # name in the legend
+        series.setName(self.body_choice.currentText())  
         pen = QPen(QColor(color))
         pen.setWidth(2)
         series.setPen(pen)
