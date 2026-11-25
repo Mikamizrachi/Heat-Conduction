@@ -47,10 +47,11 @@ class HeatTransfer(QWidget):
         self.box1 = self.make_box("red")
         self.box2 = self.make_box("black")
 
-        bar = QFrame()
-        bar.setFixedHeight(22)
-        bar.setFixedWidth(200) 
-        bar.setStyleSheet("background-color: #a9a9a9;")
+        self.bar = QFrame()
+        self.bar.setFixedHeight(22)
+        self.bar.setFixedWidth(200) 
+        self.update_bar(200, 0)
+
 
         self.conductivity = self.make_spinbox(1.0, " J/s°C")
         self.conductivity.setFixedWidth(160)
@@ -70,7 +71,7 @@ class HeatTransfer(QWidget):
         middle.setSpacing(0)
         middle.addStretch()
         middle.addWidget(conductivity_box)
-        middle.addWidget(bar)
+        middle.addWidget(self.bar)
         middle.addWidget(spacer)
         middle.addStretch()
 
@@ -208,16 +209,26 @@ class HeatTransfer(QWidget):
     
     def left_temperature_changed(self, value):
         self.show_temperature(self.box1, self.temp1_label, value)
+        self.update_bar(value, self.slider2.value())
 
     def right_temperature_changed(self, value):
         self.show_temperature(self.box2, self.temp2_label, value)
+        self.update_bar(self.slider1.value(), value)
+
+    def temp_to_red(self, temp):
+        red = int(temp / 200 * 255)
+        return max(0, min(255, red))
 
     def show_temperature(self, box, label, temp):
         label.setText(f"{temp:.1f} °C")
-      
-        red = int(temp / 200 * 255)
-        red = max(0, min(255, red))  
+        red = self.temp_to_red(temp)
         box.setStyleSheet(f"background-color: rgb({red}, 0, 0);")
+
+    def update_bar(self, temp1, temp2):
+        red1 = self.temp_to_red(temp1)
+        red2 = self.temp_to_red(temp2)
+        self.bar.setStyleSheet(
+            "background: qlineargradient(x1:0, y1:0, x2:1, y2:0, "f"stop:0 rgb({red1}, 0, 0), stop:1 rgb({red2}, 0, 0));")
 
     def start_stop_button_method(self, checked):
         if checked:
@@ -267,6 +278,7 @@ class HeatTransfer(QWidget):
         self.slider2.setValue(round(t2))
         self.show_temperature(self.box1, self.temp1_label, t1)
         self.show_temperature(self.box2, self.temp2_label, t2)
+        self.update_bar(t1, t2) 
 
         self.time = self.time + dt
         self.save_history()
