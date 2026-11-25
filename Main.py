@@ -1,4 +1,6 @@
 import sys
+import csv
+import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt , QTimer
@@ -266,6 +268,7 @@ class GraphWindow(QWidget):
 
         self.export_button = QPushButton("Export to CSV", self)
         self.export_button.setGeometry(310, 140, 110, 30)
+        self.export_button.clicked.connect(self.export_clicked)
 
 
     def draw_clicked(self):
@@ -299,6 +302,24 @@ class GraphWindow(QWidget):
 
     def clear_clicked(self):
         self.chart.removeAllSeries()
+
+  
+    def export_clicked(self):
+        times = self.main_window.time_history
+        temps1 = self.main_window.body1_temp_history
+        temps2 = self.main_window.body2_temp_history
+        if len(times) == 0:
+            return  
+
+        file_path = Path(__file__).with_name("results.csv")
+
+        with open(file_path, "w", newline="", encoding="utf-8-sig") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Time (s)", "Temperature 1 (°C)", "Temperature 2 (°C)"])
+            for i in range(len(times)):
+                writer.writerow([times[i], temps1[i], temps2[i]])
+
+        os.startfile(file_path)      
 
 
 
