@@ -134,11 +134,22 @@ class HeatTransfer(QWidget):
             grid.addWidget(QLabel(name), row, 4, alignment=Qt.AlignRight)
         grid.setColumnStretch(2, 1)
 
+        self.room_temp = self.make_spinbox(20, " °C", 0, 200)
+        self.heat_loss = self.make_spinbox(0, " J/s°C", 0, 100)  
+
+        settings = QHBoxLayout()
+        settings.addWidget(QLabel("Room temp."))
+        settings.addWidget(self.room_temp)
+        settings.addStretch()
+        settings.addWidget(QLabel("Heat loss"))
+        settings.addWidget(self.heat_loss)
+
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(15, 15, 15, 15)
         main_layout.setSpacing(15)
         main_layout.addLayout(top)
         main_layout.addLayout(grid)
+        main_layout.addLayout(settings)
 
         self.resize(600, 480)
 
@@ -238,9 +249,8 @@ class HeatTransfer(QWidget):
             q = q_max
         self.body1.add_heat(-q)  
         self.body2.add_heat(q)  
-
-        heat1 = self.heater1.value() * dt
-        heat2 = self.heater2.value() * dt
+        heat1 = self.heater1.value() * dt - self.room_loss(self.body1.temp, cap1, dt)
+        heat2 = self.heater2.value() * dt - self.room_loss(self.body2.temp, cap2, dt)
         t1 = self.body1.add_heat(heat1)
         t2 = self.body2.add_heat(heat2)
 
@@ -255,6 +265,15 @@ class HeatTransfer(QWidget):
         if abs(t1 - t2) < 0.1:
             self.start_button.setChecked(False)  
             QMessageBox.information(self, "Equilibrium",f"The temperatures are equal ({t1:.1f} °C) after {self.time:.1f} s.")
+
+     
+    def room_loss(self, temp, cap, dt):
+        room = self.room_temp.value()
+        loss = self.heat_loss.value() * (temp - room) * dt
+        max_loss = cap * (temp - room)
+        if abs(loss) > abs(max_loss):
+            loss = max_loss
+        return loss       
 
     def save_history(self):
         self.time_history.append(round(self.time, 2))
