@@ -14,6 +14,7 @@ from About import About
 from Body import Body
 
 STYLE_FILE = Path(__file__).with_name("style.css")
+MATERIALS = { "Custom": None, "Water": 4186, "Aluminum": 897, "Glass": 840, "Iron": 449, "Copper": 385,}
 GITHUB_URL = "https://github.com/Mikamizrachi/Heat-Conduction"
 
 
@@ -108,10 +109,16 @@ class HeatTransfer(QWidget):
         self.mass2 = self.make_spinbox(10.0, " kg")
         self.cap1 = self.make_spinbox(0.4, " J/kg°C")
         self.cap2 = self.make_spinbox(0.4, " J/kg°C")
+        
+        self.material1 = self.make_material_choice()
+        self.material2 = self.make_material_choice()
+        self.material1.currentTextChanged.connect(self.material1_changed)
+        self.material2.currentTextChanged.connect(self.material2_changed)
 
         rows = [
             ("Temp.", self.temp1_label, self.temp2_label, self.start_button),
             ("Mass", self.mass1, self.mass2, graphs_button),
+            ("Material", self.material1, self.material2, None),
             ("H. Cap.", self.cap1, self.cap2, about_button),
         ]
 
@@ -120,7 +127,8 @@ class HeatTransfer(QWidget):
         for row, (name, left, right, button) in enumerate(rows):
             grid.addWidget(QLabel(name), row, 0)
             grid.addWidget(left, row, 1)
-            grid.addWidget(button, row, 2, alignment=Qt.AlignHCenter)
+            if button is not None:
+                grid.addWidget(button, row, 2, alignment=Qt.AlignHCenter)
             grid.addWidget(right, row, 3)
             grid.addWidget(QLabel(name), row, 4, alignment=Qt.AlignRight)
         grid.setColumnStretch(2, 1)
@@ -157,6 +165,26 @@ class HeatTransfer(QWidget):
         label = QLabel(text)
         label.setObjectName("valueLabel")  
         return label
+
+    
+    def make_material_choice(self):
+        choice = QComboBox()
+        choice.addItems(list(MATERIALS.keys()))
+        return choice
+
+    def material1_changed(self, name):
+        self.apply_material(name, self.cap1)
+
+    def material2_changed(self, name):
+        self.apply_material(name, self.cap2)
+
+    def apply_material(self, name, cap_spin):
+        value = MATERIALS[name]
+        if value is None:
+            cap_spin.setEnabled(True)
+        else:
+            cap_spin.setValue(value)
+            cap_spin.setEnabled(False)
     
     def left_temperature_changed(self, value):
         self.show_temperature(self.box1, self.temp1_label, value)
@@ -188,8 +216,11 @@ class HeatTransfer(QWidget):
             self.start_button.setText("Start")
 
         for widget in [self.slider1, self.slider2, self.mass1, self.mass2,
-                       self.cap1, self.cap2, self.conductivity]:
+                       self.material1, self.material2, self.conductivity]:
             widget.setEnabled(not checked)
+
+        self.cap1.setEnabled(not checked and self.material1.currentText() == "Custom")
+        self.cap2.setEnabled(not checked and self.material2.currentText() == "Custom")
 
     def timer_method(self):
         k = self.conductivity.value()
