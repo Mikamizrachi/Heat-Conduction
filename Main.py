@@ -137,7 +137,12 @@ class HeatTransfer(QWidget):
         self.room_temp = self.make_spinbox(20, " °C", 0, 200)
         self.heat_loss = self.make_spinbox(0, " J/s°C", 0, 100)  
 
+        self.speed_choice = QComboBox()
+        self.speed_choice.addItems(["x1", "x10", "x100", "x1000", "x10000"])
         settings = QHBoxLayout()
+        settings.addWidget(QLabel("Speed"))
+        settings.addWidget(self.speed_choice)
+        settings.addStretch()
         settings.addWidget(QLabel("Room temp."))
         settings.addWidget(self.room_temp)
         settings.addStretch()
@@ -235,7 +240,8 @@ class HeatTransfer(QWidget):
         self.cap2.setEnabled(not checked and self.material2.currentText() == "Custom")
 
     def timer_method(self):
-        dt = self.dt
+        speed = int(self.speed_choice.currentText()[1:])  
+        dt = self.dt * speed  
 
         cap1 = self.body1.mass * self.body1.specific_heat
         cap2 = self.body2.mass * self.body2.specific_heat
