@@ -4,10 +4,10 @@ import os
 from pathlib import Path
 
 from PySide6.QtCore import Qt , QTimer
-from PySide6.QtGui import QColor, QPen
+from PySide6.QtGui import QColor, QPen, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QSlider, QFrame, QPushButton,
-    QDoubleSpinBox, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,QMessageBox
+    QDoubleSpinBox, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,QMessageBox, QStyle
 )
 from PySide6.QtCharts import QChart, QChartView, QValueAxis , QLineSeries
 from About import About
@@ -16,6 +16,22 @@ from Body import Body
 STYLE_FILE = Path(__file__).with_name("style.css")
 MATERIALS = { "Custom": None, "Wood": 1700, "Aluminum": 897, "Glass": 840, "Iron": 449, "Copper": 385,}
 GITHUB_URL = "https://github.com/Mikamizrachi/Heat-Conduction"
+
+
+
+def standard_icon(name):
+    return QApplication.style().standardIcon(name)
+
+
+def make_app_icon():
+    pixmap = QPixmap(32, 32)
+    pixmap.fill(Qt.transparent)
+    painter = QPainter(pixmap)
+    painter.fillRect(0, 6, 12, 20, QColor("red"))
+    painter.fillRect(12, 13, 8, 6, QColor("#a9a9a9"))
+    painter.fillRect(20, 6, 12, 20, QColor("black"))
+    painter.end()
+    return QIcon(pixmap)
 
 
 class HeatTransfer(QWidget):
@@ -89,7 +105,8 @@ class HeatTransfer(QWidget):
 
         self.start_button = QPushButton("Start")
         self.start_button.setObjectName("startButton")
-        self.start_button.setCheckable(True)  
+        self.start_button.setCheckable(True)
+        self.start_button.setIcon(standard_icon(QStyle.SP_MediaPlay)) 
         self.start_button.toggled.connect(self.start_stop_button_method)
 
         self.temp1_label = self.make_value_label("200.0 °C")
@@ -99,11 +116,15 @@ class HeatTransfer(QWidget):
         self.slider2.valueChanged.connect(self.right_temperature_changed)
 
         graphs_button = QPushButton("Graphs")
+        graphs_button.setIcon(standard_icon(QStyle.SP_FileDialogDetailedView))
         graphs_button.clicked.connect(self.open_graphs)
 
         about_button = QPushButton("About")
+        about_button.setIcon(standard_icon(QStyle.SP_MessageBoxInformation))
         about_button.clicked.connect(self.open_about)
+
         self.reset_button = QPushButton("Reset")
+        self.reset_button.setIcon(standard_icon(QStyle.SP_BrowserReload))
         self.reset_button.clicked.connect(self.reset_clicked)
 
 
@@ -240,11 +261,15 @@ class HeatTransfer(QWidget):
             self.body2_temp_history = []
             self.save_history() 
             self.start_button.setText("Stop")
+            self.start_button.setIcon(standard_icon(QStyle.SP_MediaStop))
+        
             self.timer.start()
         else:
 
             self.timer.stop()
             self.start_button.setText("Start")
+            self.start_button.setIcon(standard_icon(QStyle.SP_MediaPlay))
+
 
         for widget in [self.slider1, self.slider2, self.mass1, self.mass2,
                        self.material1, self.material2, self.conductivity]:
@@ -379,14 +404,17 @@ class GraphWindow(QWidget):
 
         self.draw_button = QPushButton("Draw", self)
         self.draw_button.setGeometry(310, 100, 110, 30)
+        self.draw_button.setIcon(standard_icon(QStyle.SP_DialogApplyButton))
         self.draw_button.clicked.connect(self.draw_clicked)
 
         self.clear_button = QPushButton("Clear", self)
         self.clear_button.setGeometry(310, 140, 110, 30)
+        self.clear_button.setIcon(standard_icon(QStyle.SP_DialogDiscardButton))
         self.clear_button.clicked.connect(self.clear_clicked)
 
         self.export_button = QPushButton("Export to CSV", self)
         self.export_button.setGeometry(310, 180, 110, 30)
+        self.export_button.setIcon(standard_icon(QStyle.SP_DialogSaveButton))
         self.export_button.clicked.connect(self.export_clicked)
 
 
@@ -446,6 +474,7 @@ class GraphWindow(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyleSheet(STYLE_FILE.read_text(encoding="utf-8"))
+    app.setWindowIcon(make_app_icon())
     window = HeatTransfer()
     window.show()
     sys.exit(app.exec())
