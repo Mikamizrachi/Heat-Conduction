@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt , QTimer
 from PySide6.QtGui import QColor, QPen, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QApplication, QWidget, QLabel, QSlider, QFrame, QPushButton,
-    QDoubleSpinBox, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,QMessageBox, QStyle
+    QDoubleSpinBox, QComboBox, QHBoxLayout, QVBoxLayout, QGridLayout,QMessageBox, QStyle, QCheckBox
 )
 from PySide6.QtCharts import QChart, QChartView, QValueAxis , QLineSeries
 from About import About
@@ -307,6 +307,10 @@ class HeatTransfer(QWidget):
 
         self.time = self.time + dt
         self.save_history()
+        if self.graph_window is not None:
+            self.graph_window.update_live()
+
+
 
         if abs(t1 - t2) < 0.1:
             self.start_button.setChecked(False)  
@@ -374,6 +378,11 @@ class GraphWindow(QWidget):
         super().__init__()
         self.main_window = main_window
         self.initUI()
+        self.live1 = None
+        self.live2 = None
+        self.live_times = None
+        self.live_count = 0
+
 
     def initUI(self):
         self.setWindowTitle("Graph Window")
@@ -417,11 +426,37 @@ class GraphWindow(QWidget):
         self.export_button.setIcon(standard_icon(QStyle.SP_DialogSaveButton))
         self.export_button.clicked.connect(self.export_clicked)
 
+        
+        self.live_check = QCheckBox("Live graph", self)
+        self.live_check.setGeometry(310, 220, 110, 25)
+        self.live_check.toggled.connect(self.live_toggled)
+
+    def add_line(self, name, color, times, temps):
+        series = QLineSeries()
+        series.setName(name)  
+        pen = QPen(QColor(color))
+        pen.setWidth(2)
+        series.setPen(pen)
+        for i in range(len(times)):
+            series.append(times[i], temps[i])
+
+        self.chart.addSeries(series)
+        series.attachAxis(self.axis_x)
+        series.attachAxis(self.axis_y)
+        return series
+
+    def fit_axes(self):
+        times = self.main_window.time_history
+        temps1 = self.main_window.body1_temp_history
+        temps2 = self.main_window.body2_temp_history
+        top = max(200, max(temps1), max(temps2))  
+        self.axis_x.setRange(0, max(times[-1], 1))
+        self.axis_y.setRange(0, top)
 
     def draw_clicked(self):
         times = self.main_window.time_history
         if len(times) == 0:
-            return  
+            return
         if self.body_choice.currentText() == "Body 1":
             temps = self.main_window.body1_temp_history
             color = "red"
@@ -429,26 +464,40 @@ class GraphWindow(QWidget):
             temps = self.main_window.body2_temp_history
             color = "blue"
 
-        series = QLineSeries()
-        series.setName(self.body_choice.currentText())  
-        pen = QPen(QColor(color))
-        pen.setWidth(2)
-        series.setPen(pen)
-        for i in range(len(times)):
-            series.append(times[i], temps[i])
+        self.add_line(self.body_choice.currentText(), color, times, temps)
+        self.fit_axes()
 
+    def live_toggled(self, checked):
+        self.update_live()
 
-        self.chart.addSeries(series)
-        series.attachAxis(self.axis_x)
-        series.attachAxis(self.axis_y)
+    def update_live(self):
+        if not self.live_check.isChecked():
+            return
+        times = self.main_window.time_history
+        if len(times) == 0:
+            return
 
+    
+        if self.live1 is None or times is not self.live_times:
+            self.chart.removeAllSeries()
+            self.live1 = self.add_line("Body 1", "red", [], [])
+            self.live2 = self.add_line("Body 2", "blue", [], [])
+            self.live_times = times
+            self.live_count = 0
 
-        self.axis_x.setRange(0, times[-1])
-        self.axis_y.setRange(0, 200)
+        temps1 = self.main_window.body1_temp_history
+        temps2 = self.main_window.body2_temp_history
+        for i in range(self.live_count, len(times)):
+            self.live1.append(times[i], temps1[i])
+            self.live2.append(times[i], temps2[i])
+        self.live_count = len(times)
+        self.fit_axes()
 
-
+        
     def clear_clicked(self):
         self.chart.removeAllSeries()
+        self.live1 = None
+        self.live2 = None
 
   
     def export_clicked(self):
